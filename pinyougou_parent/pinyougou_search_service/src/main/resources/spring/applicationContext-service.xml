@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--配置dubbo服务端启动的端口，默认情况下是20880-->
+    <dubbo:protocol name="dubbo" port="20883"/>
+    <!--配置dubbo应用程序名字-一般是跟项目名称一致-->
+    <dubbo:application name="pinyougou-search-service"/>
+    <!--配置注册中心-->
+    <dubbo:registry address="zookeeper://192.168.218.128:2181"/>
+    <!--配置dubbo-@Service注解包扫描路径-->
+    <dubbo:annotation package="com.pinyougou.search.service.impl"/>
+    <!--全局参数配置,超时时间：10秒,retries:不重新连接设置为0，默认超后会发起第2次请求-->
+    <dubbo:provider timeout="10000" retries="0"/>
+
+</beans>

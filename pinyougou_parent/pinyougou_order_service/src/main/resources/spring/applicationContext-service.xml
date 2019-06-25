@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://code.alibabatech.com/schema/dubbo
+       http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--dubbo不支持jdk动态代理的方式，改成cglib动态代理
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    &lt;!&ndash;配置事务管理器&ndash;&gt;
+    <bean id="dataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    &lt;!&ndash; 开启事务控制的注解支持 &ndash;&gt;
+    <tx:annotation-driven transaction-manager="dataSourceTransactionManager"/>-->
+
+    <!--抽取ID生成器，便于配置机器与数据中心id-->
+    <bean id="idWorker" class="com.pinyougou.common.utils.IdWorker">
+        <!-- 工作机器ID -->
+        <constructor-arg name="workerId" value="0"/>
+        <!-- 数据中心ID -->
+        <constructor-arg name="datacenterId" value="0"/>
+    </bean>
+
+    <dubbo:protocol name="dubbo" port="20887"/>
+    <dubbo:application name="pinyougou-order-service"/>
+    <dubbo:registry address="zookeeper://192.168.218.128:2181"/>
+    <!--配置连接超时时间(全局配置超时时间10s) retries:重连次数-->
+    <dubbo:provider timeout="10000" retries="0"/>
+    <!--配置dubbo扫描注解包-->
+    <dubbo:annotation package="com.pinyougou.order.service.impl"/>
+
+</beans>

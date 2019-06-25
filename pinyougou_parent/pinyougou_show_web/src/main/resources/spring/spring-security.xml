@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/security
+            http://www.springframework.org/schema/security/spring-security.xsd
+            http://code.alibabatech.com/schema/dubbo
+            http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!--1:公开资源配置，即取消拦截的url地址-->
+    <security:http pattern="/css/**" security="none"/>
+    <security:http pattern="/img/**" security="none"/>
+    <security:http pattern="/js/**" security="none"/>
+    <security:http pattern="/controller/**" security="none"/>
+    <security:http pattern="/plugins/**" security="none"/>
+    <security:http pattern="/register.html" security="none"/>
+    <security:http pattern="/shoplogin.html" security="none"/>
+    <!--放行商家注册功能-->
+    <security:http pattern="/seller/add.do" security="none"/>
+
+    <!-- 页面拦截规则
+        auto-config:这个是一个自动配置过滤器(Filter)的属性
+        use-expressions:"是否使用spel表达式"，
+     -->
+    <security:http auto-config="true" use-expressions="false">
+        <!--intercept-url 表示拦截页面
+            /*  表示的是该目录下的资源，只包括本级目录不包括下级目录
+            /** 表示的是该目录以及该目录下所有级别子目录的资源
+            access:这里必需是ROLE_前缀，配置角色的意思
+        -->
+        <security:intercept-url pattern="/**" access="ROLE_SELLER"/>
+
+        <!--
+            登录页面配置
+            login-page:登录页面
+            login-processing-url:处理登录的地址
+            default-target-url:登录成功后默认跳转地址
+            authentication-failure-url:登录失败跳转地址
+            always-use-default-target="true"总是使用default-target-url:作为登录成功后默认跳转地址
+         -->
+        <security:form-login
+                login-page="/shoplogin.html"
+                login-processing-url="/login"
+                default-target-url="/admin/index.html"
+                authentication-failure-url="/shoplogin.html"
+                always-use-default-target="true"
+        />
+
+        <!--关闭盗链的安全请求,即csrf校验-->
+        <security:csrf disabled="true" />
+
+        <!--
+            退出配置
+            logout-success-url:退出后跳转地址
+            invalidate-session:让当前session失效
+            logout-url：处理退出的地址
+        -->
+        <security:logout
+                logout-success-url="/shoplogin.html"
+                invalidate-session="true"
+                logout-url="/logout"
+        />
+
+        <!--配置security不拦截iframe-->
+        <security:headers>
+            <security:frame-options policy="SAMEORIGIN"/>
+        </security:headers>
+    </security:http>
+
+    <!--自定义授权认证-->
+    <security:authentication-manager>
+        <!--注入自定义授权认证类-->
+        <security:authentication-provider user-service-ref="userDetailService">
+            <security:password-encoder ref="bCryptPasswordEncoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <!--配置权限认证类-->
+    <bean id="userDetailService" class="com.pinyougou.show.service.UserDetailServiceImpl"/>
+
+    <!--加密对象-->
+    <bean id="bCryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <!--引入dubbo服务-->
+    <dubbo:application name="pinyougou-show-web"/>
+    <!--配置注册中心-->
+    <dubbo:registry address="zookeeper://192.168.218.128:2181"/>
+    <!--配置dubbo注解扫描-->
+    <dubbo:annotation package="com.pinyougou.show.service"/>
+</beans>

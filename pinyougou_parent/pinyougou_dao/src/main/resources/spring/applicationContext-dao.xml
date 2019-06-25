@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 数据库连接池 -->
+	<!-- 加载配置文件 -->
+	<context:property-placeholder location="classpath*:properties/*.properties" />
+	<!-- 数据库连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		destroy-method="close">
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="maxActive" value="10" />
+		<property name="minIdle" value="5" />
+	</bean>
+	
+	<!-- 让spring管理sqlsessionfactory 使用mybatis和spring整合包中的 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 数据库连接池 -->
+		<property name="dataSource" ref="dataSource" />
+		<!--&lt;!&ndash;配置mybatis分页插件&ndash;&gt;
+		<property name="plugins">
+			<array>
+				<bean id="pageInterceptor" class="com.github.pagehelper.PageInterceptor">
+					<property name="properties">
+						&lt;!&ndash;使用下面的方式配置参数，一行配置一个 &ndash;&gt;
+						<props>
+							&lt;!&ndash;选择合适的分页方式为mysql&ndash;&gt;
+							<prop key="helperDialect">mysql</prop>
+							&lt;!&ndash;reasonable分页合理化参数，默认值为false。当该参数设置为 true 时，pageNum<=0 时会查询第一页，
+                             pageNum>pages（超过总数时），会查询最后一页。&ndash;&gt;
+							<prop key="reasonable">true</prop>
+						</props>
+					</property>
+				</bean>
+			</array>
+		</property>-->
+		<!-- 加载mybatis的全局配置文件 -->
+		<property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml" />
+	</bean>
+
+	<!--扫描dao接口 将接口交给spring管理-->
+	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.pinyougou.mapper" />
+	</bean>
+</beans>
